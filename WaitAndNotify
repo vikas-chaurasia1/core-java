@@ -1,0 +1,50 @@
+package com.example.demo.design;
+class WaitNotify {
+    private boolean isHello=true;
+
+    public synchronized void printHello() throws InterruptedException {
+        for(int i=0;i<5;i++){
+            while(!isHello){
+                wait();
+            }
+            System.out.println("Hello..");
+            isHello=false;
+            notify();
+        }
+    }
+
+    public synchronized  void printWorld() throws InterruptedException {
+        for (int i=0;i<5;i++){
+            while (isHello){
+                wait();
+            }
+            System.out.println("World..");
+            isHello=true;
+            notify();
+        }
+    }
+}
+public class WaitAndNotify {
+    public  static void main(String args[]){
+        System.out.println("vikas chaurasia");
+        WaitNotify obj1=new WaitNotify();
+        Thread t1=new Thread(()->{
+            try {
+                obj1.printHello();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        Thread t2=new Thread(()->{
+            try {
+                obj1.printWorld();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        t1.start();
+        t2.start();
+    }
+}
