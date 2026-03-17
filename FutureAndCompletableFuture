@@ -1,0 +1,48 @@
+package com.example.demo.design;
+
+import java.util.concurrent.*;
+
+class FutureTest implements Callable<Integer>{
+    @Override
+    public Integer call(){
+        return 10;
+    }
+}
+
+class CompletableFutTest{
+    public Integer testCompltble(int a,int b){
+        return a+b;
+    }
+}
+
+public class FutureCompltble {
+    public static  void main(String[] args) throws ExecutionException, InterruptedException {
+        System.out.println("vikas");
+        FutureTest obj1 = new FutureTest();
+        ExecutorService ex = Executors.newFixedThreadPool(2);
+        Future<Integer> future = ex.submit(obj1);
+        System.out.println("Value " + future.get());
+
+        CompletableFuture<String> future1 = CompletableFuture.supplyAsync(() -> {
+            return "Completabl future";
+        });
+
+        future1.thenAccept(x -> {
+            System.out.println("value of Completable future(lambda)->" + x);
+        });
+
+        CompletableFutTest completableFutTest = new CompletableFutTest();
+        CompletableFuture<Void> future2 = CompletableFuture.supplyAsync(() -> {
+            return completableFutTest.testCompltble(10, 20);
+        }).thenAccept(x -> System.out.println("value return by " + x));
+
+        CompletableFuture<Integer> future3 = CompletableFuture.supplyAsync(() -> {
+            return completableFutTest.testCompltble(10, 20);
+        }, ex).thenApply(x -> x * 3);
+
+        future3.thenAccept(y -> {
+            System.out.println("completable future using Executor ->" + y);
+        });
+        ex.shutdown();
+    }
+}
