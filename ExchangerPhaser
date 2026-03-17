@@ -1,0 +1,51 @@
+package com.example.demo.design;
+
+import java.util.concurrent.Exchanger;
+import java.util.concurrent.Phaser;
+
+import static java.lang.System.*;
+
+public class ExchangePhase {
+    public static void main(String[] args) {
+        Exchanger<String> exchanger = new Exchanger<>();
+
+        Thread t1 = new Thread(() -> {
+            String data = "thread-1 data";
+            out.println("this is thread-1 actual data ->" + data);
+            try {
+                String exdata = exchanger.exchange(data);
+                out.println("this is thread-1 exchanged data ->" + exdata);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        Thread t2 = new Thread(() -> {
+            String data = "thread-2 data";
+            out.println("this is thread-2 actual data ->" + data);
+            try {
+                String exdata = exchanger.exchange(data);
+                out.println("this is thread-2 exchanged data ->" + exdata);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        t1.start();
+        t2.start();
+
+        Phaser phaser=new Phaser(2);
+        Runnable task=()->{
+            out.println("Phase one reached "+Thread.currentThread().getName());
+            phaser.arriveAndAwaitAdvance();
+
+            System.out.println("Phase two reached "+Thread.currentThread().getName());
+            phaser.arriveAndAwaitAdvance();
+
+            System.out.println("Phase Three reached "+Thread.currentThread().getName());
+            phaser.arriveAndAwaitAdvance();
+        };
+        new Thread(task).start();
+        new Thread(task).start();
+    }
+}
